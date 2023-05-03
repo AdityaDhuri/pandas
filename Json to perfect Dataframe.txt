@@ -1,0 +1,13 @@
+def expand_dataframe(df):
+    while any(isinstance(df[column][0],(list, dict))for column in df.columns):
+        df_expanded = df[[column for column in df.columns if not isinstance(df[column][0], (list, dict))]]
+        for column in df.columns:
+            if isinstance(df[column][0], list):
+                df_groups = pd.concat([pd.json_normalize(groups).add_prefix(f'{column}_') for groups in df[column]], ignore_index=True) 
+                df_expanded = pd.concat([df_expanded, df_groups], axis=1) 
+            elif isinstance(df[column][0], dict):
+                df_groups = pd.concat([pd.json_normalize(groups).add_prefix(f'{column}_') for groups in df[column]], ignore_index=True) 
+                df_expanded = pd.concat([df_expanded, df_groups], axis=1)
+                    
+        df = df_expanded
+    return df
